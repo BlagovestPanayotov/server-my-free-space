@@ -12,7 +12,7 @@ function createPayload(user) {
     _id: user._id,
     username: user.username,
     gender: user.gender,
-    accessToken: jwt.sign(payload, process.env.JWT_SECRET)
+    accessToken: jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }),
   };
 
 };
