@@ -3,6 +3,8 @@ const { default: mongoose } = require('mongoose');
 require('dotenv').config();
 
 const cors = require('./middlewares/cors');
+const authController = require('./controllers/authController');
+const destinationController = require('./controllers/destinationController');
 
 
 start();
@@ -19,9 +21,8 @@ async function start() {
   app.use(express.json());
   app.use(cors());
 
-  app.get('/destianations', (req, res) => {
-    res.json({ message: 'hello' });
-  });
+  app.use('/users', authController);
+  app.use('/dest', destinationController);
 
   app.listen(3030, () => console.log('>>> Server listening on port 3030...'));
 }
