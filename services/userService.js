@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
-const { createToken } = require('../utils/tokenParser');
+const { createPayload } = require('../utils/tokenParser');
 
 async function register(email, username, password, country, gender) {
   const existing = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
@@ -18,16 +18,23 @@ async function register(email, username, password, country, gender) {
     hashedPassword: await bcrypt.hash(password, 12)
   });
 
-  return {
-    _id: user._id,
-    username: user.username,
-    gender: user.gender,
-    accessToken: createToken(user)
-  };
+  return createPayload(user);
 }
 
-async function login(email, hashedPassword) {
+async function login(email, password) {
+  const user = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
 
+  if (!user) {
+    throw new Error('Incorect email or password!');
+  }
+
+  const match = await bcrypt.compare(password, user.hashedPassword);
+
+  if (!match) {
+    throw new Error('Incorect email or password!');
+  }
+
+  return createPayload(user);
 }
 
 async function logout() {
