@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
-const { createPayload } = require('../utils/tokenParser');
+const { createPayload } = require('../utils/payloadParser');
 
 async function register(email, username, password, country, gender) {
   const existing = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });

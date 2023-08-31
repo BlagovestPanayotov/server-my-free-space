@@ -1,48 +1,80 @@
 const authController = require('express').Router();
+const { body, validationResult } = require('express-validator');
 
 const { register, login } = require('../services/userService');
 const { cookieSetter } = require('../utils/cookieSetter');
+const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
+const errorParser = require('../utils/errorParser');
 
 
-authController.post('/register', async (req, res) => {
-  try {
-    console.log('>>> /users/register');
-    
-    const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender);
-    cookieSetter(res, token);
-    res.json(token);
-  } catch (err) {
-    console.log('>>> ERROR');
-    console.log(`>>> ${err.message}`);
+authController.post('/register',
+  body('email').isEmail().withMessage('Invalid email!'),
+  body('password').custom(value => {
+    const match = PASSWORD_REGEXP.test(value);
+    if (match) {
+      return true;
+    }
+    throw new Error('Password has invalid format!');
+  }),
+  body('username').isLength({ min: 5, max: 20 }).withMessage('The password must be between 5 and 20 characters long!'),
+  body('country').isIn(countriesList).withMessage('Incorrect Country!'),
+  body('gender').isIn(['M', 'W', 'unknown']).withMessage('Incorrect Gender!'),
+  async (req, res) => {
+    try {
+      console.log('>>> /users/register');
 
-    res.status(400).json({
-      message: err.message
-    });
-  }
-});
+      const { errors } = validationResult(req);
 
-authController.post('/login', async (req, res) => {
-  try {
-    console.log('>>> /users/login');
+      if (errors.length > 0) {
+        throw errors;
+      }
 
-    const token = await login(req.body.email, req.body.password,);
-    cookieSetter(res, token);
-    res.json(token);
-  } catch (err) {
-    console.log('>>> ERROR');
-    console.log(`>>> ${err.message}`);
+      const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender);
+      cookieSetter(res, token);
+      res.json(token);
+    } catch (err) {
+      const error = errorParser(err);
+      console.log('>>> ERROR');
+      console.log(`>>> ${error}`);
 
-    res.status(401).json({
-      message: err.message
-    });
-  }
-});
+      res.status(400).json({
+        errors: error
+      });
+    }
+  });
+
+authController.post('/login',
+  body('email').isEmail().withMessage('Invalid email or password!'),
+  body('password').isLength({ min: 1 }).withMessage('Invalid email or password!'),
+  async (req, res) => {
+    try {
+      console.log('>>> /users/login');
+
+      const { errors } = validationResult(req);
+
+      if (errors.length > 0) {
+        throw errors;
+      }
+
+      const token = await login(req.body.email, req.body.password,);
+      cookieSetter(res, token);
+      res.json(token);
+    } catch (err) {
+      const error = errorParser(err);
+
+      console.log('>>> ERROR');
+      console.log(`>>> ${error}`);
+
+      res.status(401).json({
+        errors: error
+      });
+    }
+  });
 
 authController.use('/logout', async (req, res) => {
   console.log('>>> /users/logout');
 
   const token = req.cookies?.['atoken'] || '';
-  console.log(token);
   cookieSetter(res, token, 'logout');
   res.status(204).end();
 });
