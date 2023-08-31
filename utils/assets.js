@@ -1,5 +1,7 @@
 const PASSWORD_REGEXP = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[-*+=_!$%&]).{8,28}$/);
 
+const URL_REGEXP = new RegExp(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/);
+
 const countriesList = [
   'Afghanistan',
   'Aland Islands',
@@ -256,6 +258,7 @@ const countriesList = [
 ];
 
 module.exports = {
+  URL_REGEXP,
+  PASSWORD_REGEXP,
   countriesList,
-  PASSWORD_REGEXP
 };

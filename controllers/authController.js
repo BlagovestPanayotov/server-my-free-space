@@ -74,7 +74,7 @@ authController.post('/login',
 authController.use('/logout', async (req, res) => {
   console.log('>>> /users/logout');
 
-  const token = req.cookies?.['atoken'] || '';
+  const token = req.token || '';
   cookieSetter(res, token, 'logout');
   res.status(204).end();
 });
