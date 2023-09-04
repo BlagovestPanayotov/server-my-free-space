@@ -2,7 +2,7 @@ const authController = require('express').Router();
 const { body, validationResult } = require('express-validator');
 
 const { register, login } = require('../services/userService');
-const { cookieSetter } = require('../utils/cookieSetter');
+const { authHeaderSetter } = require('../utils/authHeaderSetter');
 const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
 
@@ -30,7 +30,7 @@ authController.post('/register',
       }
 
       const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender);
-      cookieSetter(res, token);
+      authHeaderSetter(res, token);
       res.json(token);
     } catch (err) {
       const error = errorParser(err);
@@ -57,7 +57,7 @@ authController.post('/login',
       }
 
       const token = await login(req.body.email, req.body.password,);
-      cookieSetter(res, token);
+      authHeaderSetter(res, token);
       res.json(token);
     } catch (err) {
       const error = errorParser(err);
@@ -75,7 +75,7 @@ authController.use('/logout', async (req, res) => {
   console.log('>>> /users/logout');
 
   const token = req.token || '';
-  cookieSetter(res, token, 'logout');
+  authHeaderSetter(res, token, 'logout');
   res.status(204).end();
 });
 
