@@ -1,8 +1,9 @@
 const express = require('express');
 const { default: mongoose } = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
-const cors = require('./middlewares/cors');
+const corsConfig = require('./middlewares/corsConfig');
 const authController = require('./controllers/authController');
 const destinationController = require('./controllers/destinationController');
 const trimBody = require('./middlewares/trimBody');
@@ -21,7 +22,7 @@ async function start() {
   const app = express();
 
   app.use(express.json());
-  app.use(cors());
+  app.use(cors(corsConfig));
   app.use(trimBody());
   app.use(session());
 

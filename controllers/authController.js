@@ -5,6 +5,7 @@ const { register, login } = require('../services/userService');
 const { authHeaderSetter } = require('../utils/authHeaderSetter');
 const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
+const User = require('../models/User');
 
 
 authController.post('/register',
@@ -77,6 +78,22 @@ authController.use('/logout', async (req, res) => {
   const token = req.token || '';
   authHeaderSetter(res, token, 'logout');
   res.status(204).end();
+});
+
+authController.use('/user', async (req, res) => {
+  try {
+    console.log('>>> /users/user');
+
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+
+    const { email, username, country, gender } = user;
+
+    res.json({ email, username, country, gender });
+  } catch (err) {
+    res.status(400).send({ message: 'User not found' });
+  }
 });
 
 module.exports = authController;
