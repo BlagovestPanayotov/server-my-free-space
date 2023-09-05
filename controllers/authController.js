@@ -38,7 +38,7 @@ authController.post('/register',
       console.log('>>> ERROR');
       console.log(`>>> ${error}`);
 
-      res.status(400).json({
+      res.status(409).json({
         errors: error
       });
     }
