@@ -1,11 +1,19 @@
 const Destination = require("../models/Destination");
 
-async function getAll() {
-  return Destination.find({});
+async function getAll(name, country, offset, pageSize) {
+  const nameRegexp = new RegExp(name, 'i');
+  if (country) {
+    return Destination.find({ name: { $regex: nameRegexp }, country: country });
+  }
+  return Destination.find({ name: { $regex: nameRegexp } });
 }
 
-async function getByUserId(userId) {
-  return Destination.find({ _ownerId: userId });
+async function getByUserId(name, country, offset, pageSize, userId){
+  const nameRegexp = new RegExp(name, 'i');
+  if (country) {
+    return Destination.find({ _ownerId: userId, name: { $regex: nameRegexp }, country: country });
+  }
+  return Destination.find({ name: { $regex: nameRegexp } });
 }
 
 async function getById(id) {

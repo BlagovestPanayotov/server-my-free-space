@@ -5,26 +5,36 @@ const errorParser = require('../utils/errorParser');
 const destinationController = require('express').Router();
 
 destinationController.get('/destinations', async (req, res) => {
-  let destinations;
+  try {
 
-  if (req.query.where) {
-    console.log('>>> GET /dest/destinations with user');
-
-    //TO DO -get the reaql id
-    const userId = '64f0e8ec4ec379100ab92849';
-
-    destinations = await getByUserId(userId);
-
-  } else {
     console.log('>>> GET /dest/destinations');
 
-    console.log(req.query);
+    const { name, country, offset, pageSize } = req.query;
 
-    destinations = await getAll();
+    const destinations = await getAll(name, country, offset, pageSize);
+
+    res.json(destinations);
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(400).json({ error });
   }
+});
 
+destinationController.get('/my-destination/', async (req, res) => {
+  try {
 
-  res.json(destinations);
+    console.log('>>> GET /dest/my-destination');
+
+    const userId = req.user._id;
+    const { name, country, offset, pageSize } = req.query;
+
+    const destinations = await getByUserId(name, country, offset, pageSize, userId);
+
+    res.json(destinations);
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(400).json({ error });
+  }
 });
 
 destinationController.post('/destinations', hasUser(), async (req, res) => {
@@ -34,6 +44,7 @@ destinationController.post('/destinations', hasUser(), async (req, res) => {
     const dest = await create(req.body.name, req.body.country, req.body.description, req.body.img, req.user._id);
     res.json(dest);
   } catch (err) {
+    console.log(err);
     const error = errorParser(err);
     res.status(400).json({ error });
   }
