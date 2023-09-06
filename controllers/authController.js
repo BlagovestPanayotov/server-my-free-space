@@ -90,7 +90,7 @@ authController.use('/user', async (req, res) => {
 
     const { email, username, country, gender } = user;
 
-    res.json({ email, username, country, gender });
+    res.json({ email, username, country, gender, userId });
   } catch (err) {
     res.status(400).send({ message: 'User not found' });
   }
