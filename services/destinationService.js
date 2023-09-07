@@ -1,23 +1,162 @@
+const { Types } = require('mongoose');
+
 const Destination = require("../models/Destination");
 
 async function getAll(name, country, offset, pageSize) {
   const nameRegexp = new RegExp(name, 'i');
   if (country) {
-    return Destination.find({ name: { $regex: nameRegexp }, country: country });
+    return Destination.aggregate([
+      {
+        $match: {
+          name: { $regex: nameRegexp },
+          country: country,
+        },
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+          as: 'likes',
+        },
+      },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+          as: 'comments',
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          country: 1,
+          description: 1,
+          img: 1,
+          _ownerId: 1,
+          likeCount: { $size: '$likes' },
+          commentCount: { $size: '$comments' },
+        },
+      },
+    ]);
   }
-  return Destination.find({ name: { $regex: nameRegexp } });
+  return Destination.aggregate([
+    {
+      $match: {
+        name: { $regex: nameRegexp },
+      },
+    },
+    {
+      $lookup: {
+        from: 'likes',
+        localField: '_id',
+        foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+        as: 'likes',
+      },
+    },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+        as: 'comments',
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        country: 1,
+        description: 1,
+        img: 1,
+        _ownerId: 1,
+        likeCount: { $size: '$likes' },
+        commentCount: { $size: '$comments' },
+      },
+    },
+  ]);
 }
 
-async function getByUserId(name, country, offset, pageSize, userId) {
+async function getByUserId(userId, name, country, offset, pageSize) {
   const nameRegexp = new RegExp(name, 'i');
+  const _userId = new Types.ObjectId(userId);
   if (country) {
-    return Destination.find({ _ownerId: userId, name: { $regex: nameRegexp }, country: country });
+    return Destination.aggregate([
+      {
+        $match: {
+          _ownerId: _userId,
+          name: { $regex: nameRegexp },
+          country: country,
+        },
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+          as: 'likes',
+        },
+      },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+          as: 'comments',
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          country: 1,
+          description: 1,
+          img: 1,
+          _ownerId: 1,
+          likeCount: { $size: '$likes' },
+          commentCount: { $size: '$comments' },
+        },
+      },
+    ]);
   }
-  return Destination.find({ _ownerId: userId, name: { $regex: nameRegexp } });
+  return Destination.aggregate([
+    {
+      $match: {
+        _ownerId: _userId,
+        name: { $regex: nameRegexp },
+      },
+    },
+    {
+      $lookup: {
+        from: 'likes',
+        localField: '_id',
+        foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+        as: 'likes',
+      },
+    },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+        as: 'comments',
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        country: 1,
+        description: 1,
+        img: 1,
+        _ownerId: 1,
+        likeCount: { $size: '$likes' },
+        commentCount: { $size: '$comments' },
+      },
+    },
+  ]);
 }
 
 async function getById(id) {
-  return Destination.findById(id);
+  return Destination.findById(id).populate('comments').populate('likes');
 
 }
 

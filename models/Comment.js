@@ -3,7 +3,8 @@ const { Schema, model, Types: { ObjectId } } = require('mongoose');
 const commentSchema = new Schema({
   _destinationId: { type: ObjectId, ref: 'Destination', required: true },
   _ownerId: { type: ObjectId, ref: 'User', required: true },
-  content: { type: String, required: true, minlength: [5, 'The comment must be at least 5 characters long!'] }
+  content: { type: String, required: true, minlength: [5, 'The comment must be at least 5 characters long!'] },
+  likes: { type: [{ type: ObjectId, ref: 'LikeComment' }], default: () => [] }
 });
 
 const Comment = model('Comment', commentSchema);

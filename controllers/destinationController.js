@@ -28,7 +28,7 @@ destinationController.get('/my-destination/', async (req, res) => {
     const userId = req.user._id;
     const { name, country, offset, pageSize } = req.query;
 
-    const destinations = await getByUserId(name, country, offset, pageSize, userId);
+    const destinations = await getByUserId(userId, name, country, offset, pageSize);
 
     res.json(destinations);
   } catch (err) {
@@ -64,6 +64,7 @@ destinationController.get('/:id', async (req, res) => {
     const dest = await getById(req.params.id);
     res.json(dest);
   } catch (err) {
+    console.log(err);
     const error = errorParser(err);
     res.status(404).json({ error });
   }
