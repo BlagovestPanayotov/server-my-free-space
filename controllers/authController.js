@@ -92,7 +92,7 @@ authController.use('/user', async (req, res) => {
 
     res.json({ email, username, country, gender, userId });
   } catch (err) {
-    res.status(400).send({ message: 'User not found' });
+    res.json(undefined);
   }
 });
 
