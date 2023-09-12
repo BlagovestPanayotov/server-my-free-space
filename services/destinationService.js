@@ -14,7 +14,7 @@ async function getAll(name, country, offset, pageSize) {
       },
       {
         $lookup: {
-          from: 'likes',
+          from: 'likedestinations',
           localField: '_id',
           foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
           as: 'likes',
@@ -38,7 +38,7 @@ async function getAll(name, country, offset, pageSize) {
           likeCount: { $size: '$likes' },
           commentCount: { $size: '$comments' },
         },
-      },
+      }
     ]);
   }
   return Destination.aggregate([
@@ -49,7 +49,7 @@ async function getAll(name, country, offset, pageSize) {
     },
     {
       $lookup: {
-        from: 'likes',
+        from: 'likedestinations',
         localField: '_id',
         foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
         as: 'likes',
@@ -73,7 +73,7 @@ async function getAll(name, country, offset, pageSize) {
         likeCount: { $size: '$likes' },
         commentCount: { $size: '$comments' },
       },
-    },
+    }
   ]);
 }
 
@@ -181,7 +181,7 @@ async function update(id, dest) {
 }
 
 async function deleteById(id) {
-  return Destination.findOneAndDelete(id);
+  return Destination.findOneAndDelete({ _id: id });
 }
 
 async function getRandom() {
@@ -189,11 +189,71 @@ async function getRandom() {
     const count = await Destination.count({});
     const random1 = Math.floor(Math.random() * count);
     const random2 = Math.floor(Math.random() * count);
-    return Promise.all([
-      Destination.findOne().limit(1).skip(random1),
-      Destination.findOne().limit(1).skip(random2),
+    const [one, two] = await Promise.all([
+      Destination.aggregate([
+        { $skip: random1 },
+        { $limit: 1 },
+        {
+          $lookup: {
+            from: 'likedestinations',
+            localField: '_id',
+            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+            as: 'likes',
+          },
+        },
+        {
+          $lookup: {
+            from: 'comments',
+            localField: '_id',
+            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+            as: 'comments',
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            country: 1,
+            description: 1,
+            img: 1,
+            _ownerId: 1,
+            likeCount: { $size: '$likes' },
+            commentCount: { $size: '$comments' },
+          },
+        }
+      ]),
+      Destination.aggregate([
+        { $skip: random2 },
+        { $limit: 1 },
+        {
+          $lookup: {
+            from: 'likedestinations',
+            localField: '_id',
+            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+            as: 'likes',
+          },
+        },
+        {
+          $lookup: {
+            from: 'comments',
+            localField: '_id',
+            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+            as: 'comments',
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            country: 1,
+            description: 1,
+            img: 1,
+            _ownerId: 1,
+            likeCount: { $size: '$likes' },
+            commentCount: { $size: '$comments' },
+          },
+        }
+      ]),
     ]);
-
+    return [one[0], two[0]];
   } catch (err) {
     console.log(err);
   }

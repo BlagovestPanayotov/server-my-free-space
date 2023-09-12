@@ -10,6 +10,7 @@ function hasUser() {
 
 function isGuest() {
   return (req, res, next) => {
+    console.log(req.user);
     if (req.user) {
       res.status(400).json({ message: 'You are already logged in!' });
     } else {

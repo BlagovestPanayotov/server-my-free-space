@@ -5,6 +5,6 @@ const likeCommentSchema = new Schema({
   _ownerId: { type: ObjectId, ref: 'User', required: true },
 });
 
-const LikeComment = model('Like', likeCommentSchema);
+const LikeComment = model('LikeComment', likeCommentSchema);
 
 module.exports = LikeComment;

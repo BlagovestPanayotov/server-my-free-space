@@ -8,6 +8,7 @@ const authController = require('./controllers/authController');
 const destinationController = require('./controllers/destinationController');
 const trimBody = require('./middlewares/trimBody');
 const session = require('./middlewares/session');
+const accessoryDestController = require('./controllers/accessorydestController');
 
 
 start();
@@ -28,6 +29,7 @@ async function start() {
 
   app.use('/users', authController);
   app.use('/dest', destinationController);
+  app.use('/accessory', accessoryDestController);
 
   app.listen(3030, () => console.log('>>> Server listening on port 3030...'));
 }

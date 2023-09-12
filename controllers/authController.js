@@ -6,9 +6,10 @@ const { authHeaderSetter } = require('../utils/authHeaderSetter');
 const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
 const User = require('../models/User');
+const { isGuest, hasUser } = require('../middlewares/guards');
 
 
-authController.post('/register',
+authController.post('/register', isGuest(),
   body('email').isEmail().withMessage('Invalid email!'),
   body('password').custom(value => {
     const match = PASSWORD_REGEXP.test(value);
@@ -44,7 +45,7 @@ authController.post('/register',
     }
   });
 
-authController.post('/login',
+authController.post('/login', isGuest(),
   body('email').isEmail().withMessage('Invalid email or password!'),
   body('password').isLength({ min: 1 }).withMessage('Invalid email or password!'),
   async (req, res) => {
@@ -72,7 +73,7 @@ authController.post('/login',
     }
   });
 
-authController.use('/logout', async (req, res) => {
+authController.use('/logout', hasUser(), async (req, res) => {
   console.log('>>> /users/logout');
 
   const token = req.token || '';
@@ -90,7 +91,7 @@ authController.use('/user', async (req, res) => {
 
     const { email, username, country, gender } = user;
 
-    res.json({ email, username, country, gender, userId });
+    res.json({ email, username, country, gender, _id:userId });
   } catch (err) {
     res.json(undefined);
   }

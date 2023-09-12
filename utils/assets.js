@@ -260,5 +260,5 @@ const countriesList = [
 module.exports = {
   URL_REGEXP,
   PASSWORD_REGEXP,
-  countriesList,
+  countriesList
 };

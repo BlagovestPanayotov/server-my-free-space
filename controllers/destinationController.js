@@ -1,8 +1,9 @@
+const destinationController = require('express').Router();
+
 const { hasUser } = require('../middlewares/guards');
 const { getAll, create, getById, update, deleteById, getByUserId, getRandom } = require('../services/destinationService');
 const errorParser = require('../utils/errorParser');
 
-const destinationController = require('express').Router();
 
 destinationController.get('/destinations', async (req, res) => {
   try {
@@ -20,7 +21,7 @@ destinationController.get('/destinations', async (req, res) => {
   }
 });
 
-destinationController.get('/my-destination/', async (req, res) => {
+destinationController.get('/my-destination/', hasUser(), async (req, res) => {
   try {
 
     console.log('>>> GET /dest/my-destination');
@@ -91,10 +92,10 @@ destinationController.delete('/:id', hasUser(), async (req, res) => {
 
   const dest = await getById(req.params.id);
   if (req.user._id != dest._ownerId) {
-    return res.status(403).json({ message: 'You cannot modify this destination!' });
+    return res.status(403).json({ message: 'You cannot delete this destination!' });
   }
   try {
-    const dest = await deleteById(req.params.id);
+    await deleteById(req.params.id);
     res.status(204).end();
   } catch (err) {
     const error = errorParser(err);
