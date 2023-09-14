@@ -23,7 +23,7 @@ authController.post('/register', isGuest(),
   body('gender').isIn(['M', 'W', 'unknown']).withMessage('Incorrect Gender!'),
   async (req, res) => {
     try {
-      console.log('>>> /users/register');
+      console.log('>>>POST /users/register');
 
       const { errors } = validationResult(req);
 
@@ -50,7 +50,7 @@ authController.post('/login', isGuest(),
   body('password').isLength({ min: 1 }).withMessage('Invalid email or password!'),
   async (req, res) => {
     try {
-      console.log('>>> /users/login');
+      console.log('>>>POST /users/login');
 
       const { errors } = validationResult(req);
 
@@ -74,7 +74,7 @@ authController.post('/login', isGuest(),
   });
 
 authController.use('/logout', hasUser(), async (req, res) => {
-  console.log('>>> /users/logout');
+  console.log('>>>USE /users/logout');
 
   const token = req.token || '';
   authHeaderSetter(res, token, 'logout');
@@ -83,7 +83,7 @@ authController.use('/logout', hasUser(), async (req, res) => {
 
 authController.use('/user', async (req, res) => {
   try {
-    console.log('>>> /users/user');
+    console.log('>>>USE /users/user');
 
     const userId = req.user._id;
 
