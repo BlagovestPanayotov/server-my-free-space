@@ -12,7 +12,7 @@ destinationController.get('/destinations', async (req, res) => {
 
     const { name, country, offset, pageSize } = req.query;
 
-    const destinations = await getAll(name, country, offset, pageSize);
+    const destinations = await getAll(name.trim(), country.trim(), offset.trim(), pageSize.trim());
 
     res.json(destinations);
   } catch (err) {
