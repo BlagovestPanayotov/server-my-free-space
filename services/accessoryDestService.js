@@ -1,14 +1,18 @@
 const { Types, model } = require('mongoose');
 
 const LikeDestination = require("../models/LikeDestination");
+const Comment = require('../models/Comment');
 
 async function getAllDestLikes(destId, userId) {
   const likes = await LikeDestination.find({ _destinationId: destId }).count();
-  const liked = await hasLikedPost(destId, userId);
-  return [
-    likes,
-    !!liked
-  ];
+  if (userId) {
+    const liked = await hasLikedPost(destId, userId);
+    return [
+      likes,
+      !!liked
+    ];
+  }
+  return [likes];
 };
 
 async function hasLikedPost(destId, userId) {
@@ -30,9 +34,15 @@ async function removePostLike(_destinationId, _ownerId) {
   });
 }
 
+
+async function getAllComments(_destinationId) {
+  return Comment.find({ _destinationId });
+}
+
 module.exports = {
   getAllDestLikes,
   givePostLike,
   hasLikedPost,
-  removePostLike
+  removePostLike,
+  getAllComments
 };

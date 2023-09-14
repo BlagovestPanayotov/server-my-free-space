@@ -1,4 +1,4 @@
-const { getAllDestLikes, hasLikedPost, givePostLike, removePostLike } = require('../services/accessoryDestService');
+const { getAllDestLikes, hasLikedPost, givePostLike, removePostLike, getAllComments } = require('../services/accessoryDestService');
 const errorParser = require('../utils/errorParser');
 
 const accessoryDestController = require('express').Router();
@@ -10,7 +10,7 @@ accessoryDestController.get('/likes', async (req, res) => {
 
     const destId = req.query.dest;
 
-    const likes = await getAllDestLikes(destId, req.user._id);
+    const likes = await getAllDestLikes(destId, req.user?._id);
 
     res.json(likes);
   } catch (err) {
@@ -26,7 +26,8 @@ accessoryDestController.post('/likes', async (req, res) => {
     const destId = req.body._destinationId;
     const userId = req.user._id;
 
-    const liked = await hasLikedPost(destId, userId);
+
+    const liked = await hasLikedPost(destId || null, userId);
     if (liked) {
       throw new Error('You have already liked this destination!');
     }
@@ -57,6 +58,23 @@ accessoryDestController.post('/likes/remove', async (req, res) => {
     const error = errorParser(err);
     res.status(401).json({ error });
   }
+});
+
+accessoryDestController.get('/comments', async (req, res) => {
+  console.log(`>>>GET /accessory/comments/remove ${req.query.dest}`);
+
+  try {
+    const destId = req.query.dest;
+
+    const comments = await getAllComments(destId);
+
+    res.json(comments);
+
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(400).json({ error });
+  }
+
 });
 
 // const hasLiked = await LikeComment.findOne({ _ownerId: userId }, { __destinationId: postId });
