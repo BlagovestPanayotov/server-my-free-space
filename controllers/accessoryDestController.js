@@ -1,4 +1,4 @@
-const { getAllDestLikes, hasLikedPost, givePostLike, removePostLike, getAllComments } = require('../services/accessoryDestService');
+const { getAllDestLikes, hasLikedPost, givePostLike, removePostLike, getAllComments, createComment } = require('../services/accessoryDestService');
 const errorParser = require('../utils/errorParser');
 
 const accessoryDestController = require('express').Router();
@@ -75,6 +75,20 @@ accessoryDestController.get('/comments', async (req, res) => {
     res.status(400).json({ error });
   }
 
+});
+
+accessoryDestController.post('/comments', async (req, res) => {
+  try {
+    const { _destinationId, content } = req.body;
+    const _ownerId = req.user._id;
+
+    const comment = await createComment(_destinationId, content, _ownerId);
+
+    res.status(201).json(comment);
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(403).json({ error });
+  }
 });
 
 // const hasLiked = await LikeComment.findOne({ _ownerId: userId }, { __destinationId: postId });

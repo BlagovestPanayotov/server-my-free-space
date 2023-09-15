@@ -39,10 +39,19 @@ async function getAllComments(_destinationId) {
   return Comment.find({ _destinationId });
 }
 
+async function createComment(_destinationId, content, _ownerId) {
+  return Comment.create({
+    _destinationId,
+    content,
+    _ownerId
+  });
+}
+
 module.exports = {
   getAllDestLikes,
   givePostLike,
   hasLikedPost,
   removePostLike,
-  getAllComments
+  getAllComments,
+  createComment
 };
