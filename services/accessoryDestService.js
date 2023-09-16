@@ -43,9 +43,11 @@ async function getAllComments(_destinationId) {
   return Comment.find({ _destinationId });
 }
 
-async function hasLikedComment(_destinationId, _ownerIdId) {
-  return await LikeComment.findOne({ _destinationId, _ownerIdId });
+async function hasLikedComment(_destinationId, _ownerId) {
+  return await LikeComment.findOne({ _destinationId, _ownerId });
 }
+
+async function isCommentOwner(){}
 
 async function getCommentLikes(_commentId, userId) {
   const likes = await LikeComment.find({ _commentId }).count();
