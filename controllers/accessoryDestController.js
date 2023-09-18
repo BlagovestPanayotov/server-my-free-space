@@ -1,4 +1,14 @@
-const { getAllDestLikes, hasLikedPost, givePostLike, removePostLike, getAllComments, createComment, getCommentLikes } = require('../services/accessoryDestService');
+const {
+  getAllDestLikes,
+  hasLikedPost,
+  givePostLike,
+  removePostLike,
+  getAllComments,
+  createComment,
+  getCommentLikes,
+  getCommentById,
+  updateComment
+} = require('../services/accessoryDestService');
 const errorParser = require('../utils/errorParser');
 
 const accessoryDestController = require('express').Router();
@@ -6,7 +16,7 @@ const accessoryDestController = require('express').Router();
 
 accessoryDestController.get('/likes', async (req, res) => {
   try {
-    console.log('>>>GET /accessory/likes');
+    console.log('>>> GET /accessory/likes');
 
     const destId = req.query.dest;
 
@@ -20,7 +30,7 @@ accessoryDestController.get('/likes', async (req, res) => {
 });
 
 accessoryDestController.post('/likes', async (req, res) => {
-  console.log('>>>POST /accessory/likes');
+  console.log('>>> POST /accessory/likes');
 
   try {
     const destId = req.body._destinationId;
@@ -41,7 +51,7 @@ accessoryDestController.post('/likes', async (req, res) => {
 });
 
 accessoryDestController.post('/likes/remove', async (req, res) => {
-  console.log('>>>POST /accessory/likes/remove');
+  console.log('>>> POST /accessory/likes/remove');
 
   try {
     const destId = req.body._destinationId;
@@ -61,7 +71,7 @@ accessoryDestController.post('/likes/remove', async (req, res) => {
 });
 
 accessoryDestController.get('/comments', async (req, res) => {
-  console.log(`>>>GET /accessory/comments ${req.query.dest}`);
+  console.log(`>>> GET /accessory/comments ${req.query.dest}`);
 
   try {
     const destId = req.query.dest;
@@ -78,7 +88,7 @@ accessoryDestController.get('/comments', async (req, res) => {
 });
 
 accessoryDestController.post('/comments', async (req, res) => {
-  console.log(`>>>POST /accessory/comments ${req.query.dest}`);
+  console.log(`>>> POST /accessory/comments ${req.query.dest}`);
 
   try {
     const { _destinationId, content } = req.body;
@@ -93,9 +103,28 @@ accessoryDestController.post('/comments', async (req, res) => {
   }
 });
 
+accessoryDestController.put('/comments/edit/:id', async (req, res) => {
+  console.log(`>>> PUT /accessoty/comments/edit/${req.params.id}`);
+
+  const comment = await getCommentById(req.params.id);
+
+  if ((req.user._id != comment._ownerId) || (req.body._destinationId != comment._destinationId)) {
+
+    return res.status(403).json({ message: 'You cannot modify this destination!' });
+  }
+
+  try {
+    const coment = await updateComment(req.params.id, req.body);
+    res.json(coment);
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(400).json({ error });
+  }
+});
+
 accessoryDestController.get('/comments/commentLikes', async (req, res) => {
   try {
-    console.log(`>>>GET /accessory/comments/commentLikes`);
+    console.log(`>>> GET /accessory/comments/commentLikes`);
 
     const commentId = req.query.comment;
 

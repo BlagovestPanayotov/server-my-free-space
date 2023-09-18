@@ -4,7 +4,7 @@ const LikeDestination = require("../models/LikeDestination");
 const Comment = require('../models/Comment');
 const LikeComment = require('../models/LikeComment');
 
-//LIKES
+//DEST LIKES
 
 async function hasLikedPost(destId, userId) {
   return LikeDestination.findOne({ _ownerId: userId, _destinationId: destId });
@@ -43,11 +43,23 @@ async function getAllComments(_destinationId) {
   return Comment.find({ _destinationId });
 }
 
+async function getCommentById(_commentId) {
+  return Comment.findById(_commentId);
+}
+
+async function updateComment(_commentId, comment) {
+  const existing = await Comment.findById(_commentId);
+  existing.content = comment.content;
+
+  return existing.save();
+}
+
+
+//COMMENTS LIKES
+
 async function hasLikedComment(_destinationId, _ownerId) {
   return await LikeComment.findOne({ _destinationId, _ownerId });
 }
-
-async function isCommentOwner(){}
 
 async function getCommentLikes(_commentId, userId) {
   const likes = await LikeComment.find({ _commentId }).count();
@@ -69,12 +81,18 @@ async function createComment(_destinationId, content, _ownerId) {
   });
 }
 
+
 module.exports = {
   getAllDestLikes,
+  updateComment,
+
   givePostLike,
   hasLikedPost,
   removePostLike,
+
   getAllComments,
+  getCommentById,
   createComment,
+
   getCommentLikes
 };
