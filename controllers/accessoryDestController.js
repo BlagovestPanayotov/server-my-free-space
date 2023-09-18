@@ -7,7 +7,8 @@ const {
   createComment,
   getCommentLikes,
   getCommentById,
-  updateComment
+  updateComment,
+  deleteCommentById
 } = require('../services/accessoryDestService');
 const errorParser = require('../utils/errorParser');
 
@@ -108,14 +109,33 @@ accessoryDestController.put('/comments/edit/:id', async (req, res) => {
 
   const comment = await getCommentById(req.params.id);
 
-  if ((req.user._id != comment._ownerId) || (req.body._destinationId != comment._destinationId)) {
+  if (req.user._id != comment._ownerId) {
 
-    return res.status(403).json({ message: 'You cannot modify this destination!' });
+    return res.status(403).json({ message: 'You cannot modify this comment!' });
   }
 
   try {
     const coment = await updateComment(req.params.id, req.body);
     res.json(coment);
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(400).json({ error });
+  }
+});
+
+accessoryDestController.delete('/comments/delete/:id', async (req, res) => {
+  console.log(`>>> PUT /accessoty/comments/delete/${req.params.id}`);
+
+  const comment = await getCommentById(req.params.id);
+
+  if (req.user._id != comment._ownerId) {
+
+    return res.status(403).json({ message: 'You cannot delete this comment!' });
+  }
+
+  try {
+    await deleteCommentById(req.params.id);
+    res.status(204).end();
   } catch (err) {
     const error = errorParser(err);
     res.status(400).json({ error });

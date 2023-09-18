@@ -47,11 +47,24 @@ async function getCommentById(_commentId) {
   return Comment.findById(_commentId);
 }
 
+async function createComment(_destinationId, content, _ownerId) {
+  return Comment.create({
+    _destinationId,
+    content,
+    _ownerId
+  });
+}
+
 async function updateComment(_commentId, comment) {
   const existing = await Comment.findById(_commentId);
   existing.content = comment.content;
 
   return existing.save();
+}
+
+
+async function deleteCommentById(_id) {
+  return Comment.findByIdAndDelete({ _id });
 }
 
 
@@ -73,18 +86,10 @@ async function getCommentLikes(_commentId, userId) {
   return [likes];
 }
 
-async function createComment(_destinationId, content, _ownerId) {
-  return Comment.create({
-    _destinationId,
-    content,
-    _ownerId
-  });
-}
 
 
 module.exports = {
   getAllDestLikes,
-  updateComment,
 
   givePostLike,
   hasLikedPost,
@@ -93,6 +98,8 @@ module.exports = {
   getAllComments,
   getCommentById,
   createComment,
+  updateComment,
+  deleteCommentById,
 
-  getCommentLikes
+  getCommentLikes,
 };
