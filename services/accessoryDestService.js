@@ -86,6 +86,13 @@ async function getCommentLikes(_commentId, userId) {
   return [likes];
 }
 
+async function giveCommentLike(_commentId, _ownerId) {
+  return LikeComment.create({
+    _commentId,
+    _ownerId
+  });
+};
+
 
 
 module.exports = {
@@ -102,4 +109,6 @@ module.exports = {
   deleteCommentById,
 
   getCommentLikes,
+  hasLikedComment,
+  giveCommentLike,
 };

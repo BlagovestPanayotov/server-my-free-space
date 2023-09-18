@@ -3,17 +3,22 @@ const {
   hasLikedPost,
   givePostLike,
   removePostLike,
+
   getAllComments,
   createComment,
-  getCommentLikes,
-  getCommentById,
   updateComment,
-  deleteCommentById
+  deleteCommentById,
+
+  getCommentLikes,
+  hasLikedComment,
+  getCommentById,
+  giveCommentLike,
 } = require('../services/accessoryDestService');
 const errorParser = require('../utils/errorParser');
 
 const accessoryDestController = require('express').Router();
 
+//LIKES
 
 accessoryDestController.get('/likes', async (req, res) => {
   try {
@@ -71,6 +76,9 @@ accessoryDestController.post('/likes/remove', async (req, res) => {
   }
 });
 
+
+//COMMENTS
+
 accessoryDestController.get('/comments', async (req, res) => {
   console.log(`>>> GET /accessory/comments ${req.query.dest}`);
 
@@ -124,7 +132,7 @@ accessoryDestController.put('/comments/edit/:id', async (req, res) => {
 });
 
 accessoryDestController.delete('/comments/delete/:id', async (req, res) => {
-  console.log(`>>> PUT /accessoty/comments/delete/${req.params.id}`);
+  console.log(`>>> DELETE /accessoty/comments/delete/${req.params.id}`);
 
   const comment = await getCommentById(req.params.id);
 
@@ -142,6 +150,8 @@ accessoryDestController.delete('/comments/delete/:id', async (req, res) => {
   }
 });
 
+//COMMENT-LIKES
+
 accessoryDestController.get('/comments/commentLikes', async (req, res) => {
   try {
     console.log(`>>> GET /accessory/comments/commentLikes`);
@@ -156,6 +166,27 @@ accessoryDestController.get('/comments/commentLikes', async (req, res) => {
     res.status(400).json({ error });
   }
 
+});
+
+accessoryDestController.post('/comments/commentLikes', async (req, res) => {
+  console.log('>>> POST /accessory/comments/commentLikes');
+
+  try {
+    const commentId = req.body._commentId;
+    const userId = req.user._id;
+
+
+    const liked = await hasLikedComment(commentId || null, userId);
+    if (liked) {
+      throw new Error('You have already liked this comment!');
+    }
+
+    await giveCommentLike(commentId, userId);
+    res.status(204).end();
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(401).json({ error });
+  }
 });
 
 
