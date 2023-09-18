@@ -70,8 +70,8 @@ async function deleteCommentById(_id) {
 
 //COMMENTS LIKES
 
-async function hasLikedComment(_destinationId, _ownerId) {
-  return await LikeComment.findOne({ _destinationId, _ownerId });
+async function hasLikedComment(_commentId, _ownerId) {
+  return await LikeComment.findOne({ _commentId, _ownerId });
 }
 
 async function getCommentLikes(_commentId, userId) {
@@ -93,6 +93,13 @@ async function giveCommentLike(_commentId, _ownerId) {
   });
 };
 
+async function removeCommentLike(_commentId, _ownerId) {
+  return LikeComment.findOneAndDelete({
+    _commentId,
+    _ownerId
+  });
+}
+
 
 
 module.exports = {
@@ -111,4 +118,5 @@ module.exports = {
   getCommentLikes,
   hasLikedComment,
   giveCommentLike,
+  removeCommentLike
 };

@@ -13,6 +13,7 @@ const {
   hasLikedComment,
   getCommentById,
   giveCommentLike,
+  removeCommentLike,
 } = require('../services/accessoryDestService');
 const errorParser = require('../utils/errorParser');
 
@@ -177,11 +178,32 @@ accessoryDestController.post('/comments/commentLikes', async (req, res) => {
 
 
     const liked = await hasLikedComment(commentId || null, userId);
+
     if (liked) {
       throw new Error('You have already liked this comment!');
     }
 
     await giveCommentLike(commentId, userId);
+    res.status(204).end();
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(401).json({ error });
+  }
+});
+
+accessoryDestController.post('/comments/commentLikes/remove', async (req, res) => {
+  console.log('>>> POST /accessory/commentLikes/remove');
+
+  try {
+    const commentId = req.body._commentId;
+    const userId = req.user._id;
+    const liked = await hasLikedComment(commentId, userId);
+
+    if (!liked) {
+      throw new Error('You have not liked this destination!');
+    }
+
+    await removeCommentLike(commentId, userId);
     res.status(204).end();
   } catch (err) {
     const error = errorParser(err);
