@@ -45,7 +45,7 @@ authController.post('/register', isGuest(),
     }
   });
 
-authController.post('/login', isGuest(),
+authController.post('/login',
   body('email').isEmail().withMessage('Invalid email or password!'),
   body('password').isLength({ min: 1 }).withMessage('Invalid email or password!'),
   async (req, res) => {
