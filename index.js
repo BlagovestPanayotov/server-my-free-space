@@ -4,10 +4,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const corsConfig = require('./middlewares/corsConfig');
-const authController = require('./controllers/authController');
-const destinationController = require('./controllers/destinationController');
 const trimBody = require('./middlewares/trimBody');
 const session = require('./middlewares/session');
+
+const authController = require('./controllers/authController');
+const destinationController = require('./controllers/destinationController');
 const accessoryDestController = require('./controllers/accessorydestController');
 
 
@@ -22,7 +23,9 @@ async function start() {
 
   const app = express();
 
-  app.use(express.json());
+
+ 
+  app.use(express.json({limit:'50mb'}));
   app.use(cors(corsConfig));
   app.use(trimBody());
   app.use(session());

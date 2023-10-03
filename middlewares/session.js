@@ -2,7 +2,6 @@ const tokenParser = require("../utils/tokenParser");
 
 module.exports = () => (req, res, next) => {
   const token = req.headers.authorization;
-
   if (token) {
     try {
       const payload = tokenParser(token);

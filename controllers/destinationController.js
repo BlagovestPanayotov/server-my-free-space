@@ -1,4 +1,6 @@
 const destinationController = require('express').Router();
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 const { hasUser } = require('../middlewares/guards');
 const { getAll, create, getById, update, deleteById, getByUserId, getRandom } = require('../services/destinationService');
@@ -38,12 +40,16 @@ destinationController.get('/my-destination/', hasUser(), async (req, res) => {
   }
 });
 
-destinationController.post('/destinations', hasUser(), async (req, res) => {
+destinationController.post('/destinations', hasUser(), upload.single('fileInput'), async (req, res) => {
   console.log('>>> POST /dest/destinations');
 
   try {
-    const dest = await create(req.body.name, req.body.country, req.body.description, req.body.img, req.user._id);
-    res.json(dest);
+
+    console.log(req.file);
+    res.end();
+
+    // const dest = await create(req.body.name, req.body.country, req.body.description, req.body.img, req.user._id);
+    // res.json(dest);
   } catch (err) {
     console.log(err);
     const error = errorParser(err);

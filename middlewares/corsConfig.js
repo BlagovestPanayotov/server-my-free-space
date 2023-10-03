@@ -1,6 +1,5 @@
 const corsWhiteList = process.env.URL_ORIGIN.split(' ');
 
-
 module.exports = {
   origin: function (origin, callback) {
     if (corsWhiteList.indexOf(origin) !== -1) {
@@ -10,6 +9,13 @@ module.exports = {
     }
   }
 };
+
+// module.exports = {
+//   origin: '*',
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   credentials: true,
+//   optionsSuccessStatus: 204,
+// };
 
 // module.exports = () => (req, res, next) => {
 //   if (corsWhiteList.indexOf(req.headers.origin) !== -1) {
