@@ -1,10 +1,11 @@
 const destinationController = require('express').Router();
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const imgbbUploader = require("imgbb-uploader");
+
 
 const { hasUser } = require('../middlewares/guards');
 const { getAll, create, getById, update, deleteById, getByUserId, getRandom } = require('../services/destinationService');
 const errorParser = require('../utils/errorParser');
+const { upload } = require('../utils/multerConfig');
 
 
 destinationController.get('/destinations', async (req, res) => {
@@ -45,13 +46,22 @@ destinationController.post('/destinations', hasUser(), upload.single('fileInput'
 
   try {
 
-    console.log(req.file);
-    res.end();
+    const imageFile = req.file;
 
-    // const dest = await create(req.body.name, req.body.country, req.body.description, req.body.img, req.user._id);
-    // res.json(dest);
+    if (!imageFile) {
+      return res.status(400).json({ message: 'No image file uploaded' });
+    }
+
+    const options = {
+      apiKey: process.env.IMGBB_API_KEY,
+      base64string: imageFile.buffer.toString('base64'),
+    };
+
+    const imgbbResponse = await imgbbUploader(options);
+
+    const dest = await create(req.body.name, req.body.country, req.body.description, imgbbResponse.url, req.user._id);
+    res.json(dest);
   } catch (err) {
-    console.log(err);
     const error = errorParser(err);
     res.status(400).json({ error });
   }
@@ -101,6 +111,18 @@ destinationController.delete('/:id', hasUser(), async (req, res) => {
     return res.status(403).json({ message: 'You cannot delete this destination!' });
   }
   try {
+
+    //ImgBB doesn't have an option to delete an image yet. Doesn't set expiration!
+
+    // const options = {
+    //   apiKey: process.env.IMGBB_API_KEY,
+    //   imageUrl: dest.img,
+    //   expiration: 3600 
+     
+    // };
+
+    // await imgbbUploader(options);
+
     await deleteById(req.params.id);
     res.status(204).end();
   } catch (err) {
