@@ -94,9 +94,9 @@ authController.use('/logout', hasUser(), async (req, res) => {
   res.status(204).end();
 });
 
-authController.use('/user', async (req, res) => {
+authController.get('/user', async (req, res) => {
   try {
-    console.log('>>> USE /users/user');
+    console.log('>>> GET /users/user');
 
     const userId = req.user._id;
 
@@ -107,6 +107,44 @@ authController.use('/user', async (req, res) => {
     res.json({ email, username, country, gender, _id: userId, accountName });
   } catch (err) {
     res.json(undefined);
+  }
+});
+
+authController.put('/user', hasUser(), async (req, res) => {
+  try {
+    console.log('>>> PUT /users/user');
+
+    const newEmail = req.body.email;
+    const newUsername = req.body.username;
+    const newCountry = req.body.country;
+    const newGender = req.body.gender;
+    const newAccountName = req.body.accountName;
+
+    const userId = req.user._id;
+
+    const [bodyUser, user] = await Promise.all([User.findOne({ email: newEmail }), User.findById(userId)]);
+
+    const bodyUserId = bodyUser._id;
+    const userrId = user._id;
+
+
+    if (!bodyUserId.equals(userrId)) {
+      throw new Error('You can update only your own account!');
+    }
+
+    throw new Error('You can update only your own account!');
+
+    const { email, username, country, gender, accountName } = user;
+
+    res.json({ email, username, country, gender, _id: userId, accountName });
+  } catch (err) {
+    const error = errorParser(err);
+    console.log('>>> ERROR');
+    console.log(`>>> ${error}`);
+
+    res.status(401).json({
+      errors: error
+    });
   }
 });
 
