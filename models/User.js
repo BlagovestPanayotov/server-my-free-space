@@ -5,7 +5,8 @@ const userSchema = new Schema({
   username: { type: String, required: true },
   hashedPassword: { type: String, required: true },
   country: { type: String, required: true },
-  gender: { type: String, required: true }
+  gender: { type: String, required: true },
+  accountName: { type: String, required: true }
 });
 
 userSchema.index({ email: 1 }, {
