@@ -5,7 +5,7 @@ function createPayload(user) {
   const payload = {
     _id: user._id,
     username: user.email,
-    gender: user.gender
+    gender: user.gender,
   };
 
   return {

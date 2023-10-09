@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const { createPayload } = require('../utils/payloadParser');
 
-async function register(email, username, password, country, gender) {
+async function register(email, username, password, country, gender, accountName) {
   const existing = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
 
   if (existing) {
@@ -15,7 +15,8 @@ async function register(email, username, password, country, gender) {
     username,
     country,
     gender,
-    hashedPassword: await bcrypt.hash(password, 12)
+    hashedPassword: await bcrypt.hash(password, 12),
+    accountName
   });
 
   return createPayload(user);

@@ -7,6 +7,7 @@ const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
 const User = require('../models/User');
 const { isGuest, hasUser } = require('../middlewares/guards');
+const Util = require('../models/Util');
 
 
 authController.post('/register', isGuest(),
@@ -31,7 +32,19 @@ authController.post('/register', isGuest(),
         throw errors;
       }
 
-      const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender);
+      const util = await Util.findById('6523f20a83b3557fd90806a8');
+      console.log(util);
+
+      const currentGusetNumber = util.guestNumber.toString();
+
+      const accountName = 'Guest' + (currentGusetNumber.length < 8 ? '0'.repeat(8 - currentGusetNumber.length) + currentGusetNumber : currentGusetNumber);
+
+      const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender, accountName);
+
+      util.guestNumber++;
+      await util.save();
+
+
       authHeaderSetter(res, token);
       res.json(token);
     } catch (err) {
@@ -89,9 +102,9 @@ authController.use('/user', async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const { email, username, country, gender } = user;
+    const { email, username, country, gender, accountName } = user;
 
-    res.json({ email, username, country, gender, _id:userId });
+    res.json({ email, username, country, gender, _id: userId, accountName });
   } catch (err) {
     res.json(undefined);
   }
