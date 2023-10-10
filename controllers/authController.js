@@ -1,7 +1,7 @@
 const authController = require('express').Router();
 const { body, validationResult } = require('express-validator');
 
-const { register, login } = require('../services/userService');
+const { register, login, updateUser } = require('../services/userService');
 const { authHeaderSetter } = require('../utils/authHeaderSetter');
 const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
@@ -19,7 +19,7 @@ authController.post('/register', isGuest(),
     }
     throw new Error('Password has invalid format!');
   }),
-  body('username').isLength({ min: 5, max: 20 }).withMessage('The password must be between 5 and 20 characters long!'),
+  body('username').isLength({ min: 5, max: 20 }).withMessage('The username must be between 5 and 20 characters long!'),
   body('country').isIn(countriesList).withMessage('Incorrect Country!'),
   body('gender').isIn(['M', 'W', 'unknown']).withMessage('Incorrect Gender!'),
   async (req, res) => {
@@ -32,18 +32,7 @@ authController.post('/register', isGuest(),
         throw errors;
       }
 
-      const util = await Util.findById('6523f20a83b3557fd90806a8');
-      console.log(util);
-
-      const currentGusetNumber = util.guestNumber.toString();
-
-      const accountName = 'Guest' + (currentGusetNumber.length < 8 ? '0'.repeat(8 - currentGusetNumber.length) + currentGusetNumber : currentGusetNumber);
-
-      const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender, accountName);
-
-      util.guestNumber++;
-      await util.save();
-
+      const token = await register(req.body.email, req.body.username, req.body.password, req.body.country, req.body.gender);
 
       authHeaderSetter(res, token);
       res.json(token);
@@ -110,42 +99,38 @@ authController.get('/user', async (req, res) => {
   }
 });
 
-authController.put('/user', hasUser(), async (req, res) => {
-  try {
-    console.log('>>> PUT /users/user');
+authController.put('/user', hasUser(),
+  body('username').isLength({ min: 5, max: 20 }).withMessage('The username must be between 5 and 20 characters long!'),
+  body('country').isIn(countriesList).withMessage('Incorrect Country!'),
+  body('gender').isIn(['M', 'W', 'unknown']).withMessage('Incorrect Gender!'),
+  body('accountname').isLength({ min: 5, max: 20 }).withMessage('The account name must be between 5 and 20 characters long!'),
+  async (req, res) => {
+    try {
+      console.log('>>> PUT /users/user');
 
-    const newEmail = req.body.email;
-    const newUsername = req.body.username;
-    const newCountry = req.body.country;
-    const newGender = req.body.gender;
-    const newAccountName = req.body.accountName;
+      const newEmail = req.body.email;
+      const newUsername = req.body.username;
+      const newCountry = req.body.country;
+      const newGender = req.body.gender;
+      const newAccountName = req.body.accountname;
 
-    const userId = req.user._id;
+      const userId = req.user._id;
 
-    const [bodyUser, user] = await Promise.all([User.findOne({ email: newEmail }), User.findById(userId)]);
+      const [user,token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, userId);
 
-    const bodyUserId = bodyUser._id;
-    const userrId = user._id;
+      authHeaderSetter(res, token);
 
+      const { email, username, country, gender, accountName } = user;
 
-    if (!bodyUserId.equals(userrId)) {
-      throw new Error('You can update only your own account!');
+      res.json({ email, username, country, gender, _id: userId, accountName });
+    } catch (err) {
+      const error = errorParser(err);
+      console.log(`>>> ERROR ${error}`);
+
+      res.status(401).json({
+        errors: error
+      });
     }
-
-    throw new Error('You can update only your own account!');
-
-    const { email, username, country, gender, accountName } = user;
-
-    res.json({ email, username, country, gender, _id: userId, accountName });
-  } catch (err) {
-    const error = errorParser(err);
-    console.log('>>> ERROR');
-    console.log(`>>> ${error}`);
-
-    res.status(401).json({
-      errors: error
-    });
-  }
-});
+  });
 
 module.exports = authController;

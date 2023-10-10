@@ -22,8 +22,10 @@ async function start() {
       useNewUrlParser: true,
     });
 
+    // await User.updateMany({}, { $set: { accountNameChanged: false } });
+    // mongoose.disconnect();
     const app = express();
-
+    
     app.use(express.json({ limit: '50mb' }));
     app.use(cors(corsConfig));
     app.use(trimBody());

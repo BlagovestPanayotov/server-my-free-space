@@ -6,10 +6,18 @@ const userSchema = new Schema({
   hashedPassword: { type: String, required: true },
   country: { type: String, required: true },
   gender: { type: String, required: true },
-  accountName: { type: String, required: true }
+  accountName: { type: String, required: true },
+  accountNameChanged: { type: Boolean, required: true, default: false }
 });
 
 userSchema.index({ email: 1 }, {
+  collation: {
+    locale: 'en',
+    strength: 2
+  }
+});
+
+userSchema.index({ accountName: 1 }, {
   collation: {
     locale: 'en',
     strength: 2
