@@ -91,9 +91,15 @@ authController.get('/user', async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const { email, username, country, gender, accountName } = user;
+    const { email, username, country, gender, accountName, verified, verify } = user;
 
-    res.json({ email, username, country, gender, _id: userId, accountName });
+    if (verified) {
+      res.json({ email, username, country, gender, _id: userId, accountName, verified });
+    } else {
+      res.json({ email, username, country, gender, _id: userId, accountName, verified, verify });
+
+    }
+
   } catch (err) {
     res.json(undefined);
   }
@@ -116,7 +122,7 @@ authController.put('/user', hasUser(),
 
       const userId = req.user._id;
 
-      const [user,token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, userId);
+      const [user, token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, userId);
 
       authHeaderSetter(res, token);
 
@@ -132,5 +138,26 @@ authController.put('/user', hasUser(),
       });
     }
   });
+
+authController.get('/user/verify', hasUser(), async (req, res) => {
+  try {
+    console.log('>>> GET /users/user/verify');
+
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+
+    const { accountName, gender, verified, verify } = user;
+
+    if (verified) {
+      res.json({ accountName, gender, _id: userId, verified });
+    } else {
+      res.json({ accountName, gender, _id: userId, verified, verify });
+    }
+
+  } catch (err) {
+    res.json(undefined);
+  }
+});
 
 module.exports = authController;
