@@ -4,7 +4,8 @@ const commentSchema = new Schema({
   _destinationId: { type: ObjectId, ref: 'Destination', required: true },
   _ownerId: { type: ObjectId, ref: 'User', required: true },
   content: { type: String, required: true, minlength: [5, 'The comment must be at least 5 characters long!'] },
-  likes: { type: [{ type: ObjectId, ref: 'LikeComment' }], default: () => [] }
+  likes: { type: [{ type: ObjectId, ref: 'LikeComment' }], default: () => [] },
+  _createdAt: { type: Date, default: Date.now }
 });
 
 const Comment = model('Comment', commentSchema);
