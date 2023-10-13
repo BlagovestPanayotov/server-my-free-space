@@ -33,7 +33,7 @@ async function getAll(name, country, offset, pageSize) {
           name: 1,
           country: 1,
           description: 1,
-          img: 1,
+          img: '$img.thumbUrl',
           _ownerId: 1,
           likeCount: { $size: '$likes' },
           commentCount: { $size: '$comments' },
@@ -68,7 +68,7 @@ async function getAll(name, country, offset, pageSize) {
         name: 1,
         country: 1,
         description: 1,
-        img: 1,
+        img: '$img.thumbUrl',
         _ownerId: 1,
         likeCount: { $size: '$likes' },
         commentCount: { $size: '$comments' },
@@ -110,7 +110,7 @@ async function getByUserId(userId, name, country, offset, pageSize) {
           name: 1,
           country: 1,
           description: 1,
-          img: 1,
+          img: '$img.thumbUrl',
           _ownerId: 1,
           likeCount: { $size: '$likes' },
           commentCount: { $size: '$comments' },
@@ -146,7 +146,7 @@ async function getByUserId(userId, name, country, offset, pageSize) {
         name: 1,
         country: 1,
         description: 1,
-        img: 1,
+        img: '$img.thumbUrl',
         _ownerId: 1,
         likeCount: { $size: '$likes' },
         commentCount: { $size: '$comments' },
@@ -160,12 +160,15 @@ async function getById(id) {
 
 }
 
-async function create(name, country, description, img, _ownerId) {
+async function create(name, country, description, imgUrl, thumbUrl, _ownerId) {
   return Destination.create({
     name,
     country,
     description,
-    img,
+    img: {
+      imgUrl,
+      thumbUrl
+    },
     _ownerId
   });
 }
@@ -214,7 +217,7 @@ async function getRandom() {
             name: 1,
             country: 1,
             description: 1,
-            img: 1,
+            img: '$img.thumbUrl',
             _ownerId: 1,
             likeCount: { $size: '$likes' },
             commentCount: { $size: '$comments' },
@@ -245,7 +248,7 @@ async function getRandom() {
             name: 1,
             country: 1,
             description: 1,
-            img: 1,
+            img: '$img.thumbUrl',
             _ownerId: 1,
             likeCount: { $size: '$likes' },
             commentCount: { $size: '$comments' },

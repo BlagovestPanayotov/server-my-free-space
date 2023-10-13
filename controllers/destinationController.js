@@ -60,7 +60,7 @@ destinationController.post('/destinations', hasUser(), upload.single('fileInput'
 
     const imgbbResponse = await imgbbUploader(options);
 
-    const dest = await create(req.body.name, req.body.country, req.body.description, imgbbResponse.url, req.user._id);
+    const dest = await create(req.body.name, req.body.country, req.body.description, imgbbResponse.image.url, imgbbResponse.thumb.url, req.user._id);
     res.json(dest);
   } catch (err) {
     const error = errorParser(err);
