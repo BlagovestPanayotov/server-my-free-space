@@ -6,6 +6,7 @@ const { hasUser } = require('../middlewares/guards');
 const { getAll, create, getById, update, deleteById, getByUserId, getRandom } = require('../services/destinationService');
 const errorParser = require('../utils/errorParser');
 const { upload } = require('../utils/multerConfig');
+const { transporter, mailOptions } = require('../utils/nodemailerConfig');
 
 
 destinationController.get('/destinations', async (req, res) => {
@@ -118,7 +119,7 @@ destinationController.delete('/:id', hasUser(), async (req, res) => {
     //   apiKey: process.env.IMGBB_API_KEY,
     //   imageUrl: dest.img,
     //   expiration: 3600 
-     
+
     // };
 
     // await imgbbUploader(options);
