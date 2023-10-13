@@ -6,3 +6,7 @@ const messageSchema = new Schema({
   _recipientId: { type: ObjectId, ref: 'User', require: true },
   _createdAt: { type: Date, default: Date.now }
 });
+
+const Message = model('Message', messageSchema);
+
+module.exports = Message;
