@@ -91,15 +91,9 @@ authController.get('/user', async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const { email, username, country, gender, accountName, verified, verify } = user;
+    const { email, username, country, gender, accountName, accountNameChanged } = user;
 
-    if (verified) {
-      res.json({ email, username, country, gender, _id: userId, accountName, verified });
-    } else {
-      res.json({ email, username, country, gender, _id: userId, accountName, verified, verify });
-
-    }
-
+    res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged });
   } catch (err) {
     res.json(undefined);
   }
@@ -126,9 +120,9 @@ authController.put('/user', hasUser(),
 
       authHeaderSetter(res, token);
 
-      const { email, username, country, gender, accountName } = user;
+      const { email, username, country, gender, accountName, accountNameChanged, verified } = user;
 
-      res.json({ email, username, country, gender, _id: userId, accountName });
+      res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged, verified });
     } catch (err) {
       const error = errorParser(err);
       console.log(`>>> ERROR ${error}`);
@@ -139,7 +133,7 @@ authController.put('/user', hasUser(),
     }
   });
 
-authController.get('/user/verify', hasUser(), async (req, res) => {
+authController.get('/user/verify', async (req, res) => {
   try {
     console.log('>>> GET /users/user/verify');
 
@@ -147,16 +141,44 @@ authController.get('/user/verify', hasUser(), async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const { accountName, gender, verified, verify } = user;
+    const { accountName, gender, verified } = user;
 
-    if (verified) {
-      res.json({ accountName, gender, _id: userId, verified });
-    } else {
-      res.json({ accountName, gender, _id: userId, verified, verify });
-    }
-
+    res.json({ accountName, gender, _id: userId, verified });
   } catch (err) {
     res.json(undefined);
+  }
+});
+
+authController.get('/user/verify-resend', hasUser(), async (req, res) => {
+
+});
+
+authController.get('/user/verify-email', async (req, res) => {
+  try {
+
+    console.log('>>> GET /users/user/verify-email');
+
+    const token = req.query.token;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+
+    if (token !== user.verifyUrl) {
+      throw new Error('Invalid verification URL!');
+    }
+    user.verified = true;
+
+    await user.save();
+
+    res.status(200).end();
+  } catch (err) {
+    const error = errorParser(err);
+    console.log('>>> ERROR');
+    console.log(`>>> ${error}`);
+
+    res.status(401).json({
+      errors: error
+    });
   }
 });
 

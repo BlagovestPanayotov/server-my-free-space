@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const { createPayload } = require('../utils/payloadParser');
 const Util = require('../models/Util');
+const { getAccountName, getRandomUrl, getRandomPass } = require('../utils/valuesGenerator');
+const { sendVerificationEmail } = require('../utils/nodemailer/nodemailerProperties');
 
 async function register(email, username, password, country, gender) {
   const existing = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
@@ -13,10 +15,11 @@ async function register(email, username, password, country, gender) {
 
   const util = await Util.findById('6523f20a83b3557fd90806a8');
 
+  const accountName = getAccountName(util.guestNumber);
 
-  const currentGusetNumber = util.guestNumber.toString();
+  const verifyUrl = getRandomUrl();
 
-  const accountName = 'Guest' + (currentGusetNumber.length < 8 ? '0'.repeat(8 - currentGusetNumber.length) + currentGusetNumber : currentGusetNumber);
+  sendVerificationEmail(email,verifyUrl)
 
   const user = await User.create({
     email,
@@ -25,7 +28,8 @@ async function register(email, username, password, country, gender) {
     gender,
     hashedPassword: await bcrypt.hash(password, 12),
     accountName,
-    accountNameChanged: false
+    accountNameChanged: false,
+    verifyUrl
   });
 
   util.guestNumber++;
@@ -85,7 +89,7 @@ async function updateUser(newEmail, newUsername, newCountry, newGender, newAccou
   const token = createPayload(user);
 
   await user.save();
-  
+
   return [user, token];
 }
 
