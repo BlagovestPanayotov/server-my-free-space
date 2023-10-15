@@ -1,12 +1,11 @@
 const destinationController = require('express').Router();
 const imgbbUploader = require("imgbb-uploader");
 
-
 const { hasUser } = require('../middlewares/guards');
 const { getAll, create, getById, update, deleteById, getByUserId, getRandom } = require('../services/destinationService');
 const errorParser = require('../utils/errorParser');
 const { upload } = require('../utils/multerConfig');
-const { transporter, mailOptions } = require('../utils/nodemailerConfig');
+const { sendVerificationEmail } = require('../utils/nodemailer/nodemailerProperties');
 
 
 destinationController.get('/destinations', async (req, res) => {
@@ -69,6 +68,8 @@ destinationController.post('/destinations', hasUser(), upload.single('fileInput'
 });
 
 destinationController.get('/random', async (req, res) => {
+  console.log('>>> POST /dest/random');
+
   const dests = await getRandom();
 
   res.json(dests);
@@ -76,7 +77,6 @@ destinationController.get('/random', async (req, res) => {
 
 destinationController.get('/:id', async (req, res) => {
   console.log(`>>> GET /dest/${req.params.id}`);
-
 
   try {
     const dest = await getById(req.params.id);

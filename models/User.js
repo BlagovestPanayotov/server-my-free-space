@@ -12,17 +12,7 @@ const userSchema = new Schema({
   //   thumbUrl: { type: String, default: undefined }
   // },
   accountNameChanged: { type: Boolean, required: true, default: false },
-  verify: {
-    url: { type: String, required: true },
-    pass: {
-      type: String, required: true, validate: {
-        validator: function (val) {
-          return val.toString().length == 4;
-        },
-        message: 'Verification pass doesn\'t match the criteria'
-      }
-    }
-  },
+  verifyUrl: { type: String, required: true },
   verified: { type: Boolean, require: true, default: false },
   messages: { type: [{ type: ObjectId, ref: 'Message' }], default: () => [] },
   followers: { type: [{ type: ObjectId, ref: 'User' }], default: () => [] },
