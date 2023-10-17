@@ -1,13 +1,13 @@
 const authController = require('express').Router();
 const { body, validationResult } = require('express-validator');
 
-const { register, login, updateUser } = require('../services/userService');
+const { register, login, updateUser, resendVerEmail } = require('../services/userService');
 const { authHeaderSetter } = require('../utils/authHeaderSetter');
 const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
 const User = require('../models/User');
 const { isGuest, hasUser } = require('../middlewares/guards');
-const Util = require('../models/Util');
+const { getRandomUrl } = require('../utils/valuesGenerator');
 
 
 authController.post('/register', isGuest(),
@@ -150,6 +150,40 @@ authController.get('/user/verify', async (req, res) => {
 });
 
 authController.get('/user/verify-resend', hasUser(), async (req, res) => {
+  try {
+    console.log('>>> GET /users/user/verify-resend');
+
+    const user = await User.findById(req.user._id);
+
+    const timeNow = new Date();
+    const expTime = new Date();
+    expTime.setDate(user.verifyUrl._createdAt.getDate() + 1);
+
+    if (expTime > timeNow && user.verifyUrl.attempt > 2) {
+      throw new Error('You requested to many emails in a short time. Try to find the verification email in your spam emails, or try again later!');
+    }
+
+    if (expTime < timeNow && user.verifyUrl.attempt >= 3) {
+      user.verifyUrl.attempt = 0;
+      user.verifyUrl._createdAt = timeNow;
+    }
+
+    user.verifyUrl.url = getRandomUrl();
+    user.verifyUrl.attempt++;
+    await user.save();
+    resendVerEmail(user.email, user.verifyUrl.url);
+
+    res.end();
+  } catch (err) {
+    const error = errorParser(err);
+    console.log('>>> ERROR');
+    console.log(`>>> ${error}`);
+
+    res.status(401).json({
+      errors: error
+    });
+  }
+
 
 });
 
@@ -163,7 +197,7 @@ authController.get('/user/verify-email', async (req, res) => {
 
     const user = await User.findById(userId);
 
-    if (token !== user.verifyUrl) {
+    if (token !== user.verifyUrl.url) {
       throw new Error('Invalid verification URL!');
     }
     user.verified = true;

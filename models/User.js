@@ -12,12 +12,16 @@ const userSchema = new Schema({
   //   thumbUrl: { type: String, default: undefined }
   // },
   accountNameChanged: { type: Boolean, required: true, default: false },
-  verifyUrl: { type: String, required: true },
+  verifyUrl: {
+    url: { type: String, required: true },
+    attempt: { type: Number, default: 0 },
+    _createdAt: { type: Date, default: Date.now },
+  },
   verified: { type: Boolean, require: true, default: false },
-  messages: { type: [{ type: ObjectId, ref: 'Message' }], default: () => [] },
-  followers: { type: [{ type: ObjectId, ref: 'User' }], default: () => [] },
-  following: { type: [{ type: ObjectId, ref: 'User' }], default: () => [] },
-  role: { type: [{ type: String }], default: () => ['user'] }
+  messages: { type: [{ type: ObjectId, ref: 'Message' }], default: () => [], },
+  followers: { type: [{ type: ObjectId, ref: 'User' }], default: () => [], },
+  following: { type: [{ type: ObjectId, ref: 'User' }], default: () => [], },
+  role: { type: [{ type: String }], default: () => ['user'], }
 });
 
 userSchema.index({ email: 1 }, {

@@ -17,9 +17,7 @@ async function register(email, username, password, country, gender) {
 
   const accountName = getAccountName(util.guestNumber);
 
-  const verifyUrl = getRandomUrl();
-
-  sendVerificationEmail(email,verifyUrl)
+  const verUrl = getRandomUrl();
 
   const user = await User.create({
     email,
@@ -29,8 +27,12 @@ async function register(email, username, password, country, gender) {
     hashedPassword: await bcrypt.hash(password, 12),
     accountName,
     accountNameChanged: false,
-    verifyUrl
+    verifyUrl: {
+      url: verUrl
+    }
   });
+
+  sendVerificationEmail(email, verUrl);
 
   util.guestNumber++;
   await util.save();
@@ -93,9 +95,14 @@ async function updateUser(newEmail, newUsername, newCountry, newGender, newAccou
   return [user, token];
 }
 
+function resendVerEmail(userEmail, url) {
+  sendVerificationEmail(userEmail, url);
+}
+
 module.exports = {
   register,
   login,
   logout,
-  updateUser
+  updateUser,
+  resendVerEmail
 };
