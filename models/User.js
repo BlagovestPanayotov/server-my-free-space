@@ -7,10 +7,10 @@ const userSchema = new Schema({
   country: { type: String, required: true },
   gender: { type: String, required: true },
   accountName: { type: String, required: true },
-  // image: {     //Check if type: String accepts undefined
-  //   imgUrl: { type: String, default: undefined },
-  //   thumbUrl: { type: String, default: undefined }
-  // },
+  image: {     
+    imgUrl: { type: String, default: '' },
+    thumbUrl: { type: String, default: '' }
+  },
   accountNameChanged: { type: Boolean, required: true, default: false },
   verifyUrl: {
     url: { type: String, required: true },
