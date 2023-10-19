@@ -42,9 +42,8 @@ destinationController.get('/my-destination/', hasUser(), async (req, res) => {
 });
 
 destinationController.post('/destinations', hasUser(), upload.single('fileInput'), async (req, res) => {
-  console.log('>>> POST /dest/destinations');
-
   try {
+    console.log('>>> POST /dest/destinations');
 
     const imageFile = req.file;
 
