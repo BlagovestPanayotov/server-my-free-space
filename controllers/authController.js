@@ -8,6 +8,8 @@ const errorParser = require('../utils/errorParser');
 const User = require('../models/User');
 const { isGuest, hasUser } = require('../middlewares/guards');
 const { getRandomUrl } = require('../utils/valuesGenerator');
+const { upload } = require('../utils/multerConfig');
+const imgbbUploader = require('imgbb-uploader/lib/cjs');
 
 
 authController.post('/register', isGuest(),
@@ -91,9 +93,9 @@ authController.get('/user', async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const { email, username, country, gender, accountName, accountNameChanged } = user;
+    const { email, username, country, gender, accountName, image, accountNameChanged } = user;
 
-    res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged });
+    res.json({ email, username, country, gender, _id: userId, accountName, image, accountNameChanged });
   } catch (err) {
     res.json(undefined);
   }
@@ -104,25 +106,44 @@ authController.put('/user', hasUser(),
   body('country').isIn(countriesList).withMessage('Incorrect Country!'),
   body('gender').isIn(['M', 'W', 'unknown']).withMessage('Incorrect Gender!'),
   body('accountname').isLength({ min: 5, max: 20 }).withMessage('The account name must be between 5 and 20 characters long!'),
+  upload.single('fileInput'),
   async (req, res) => {
     try {
       console.log('>>> PUT /users/user');
+
+      const imageFile = req.file;
+      let imgbbResponse;
+
+      if (imageFile) {
+        const options = {
+          apiKey: process.env.IMGBB_API_KEY,
+          base64string: imageFile.buffer.toString('base64'),
+        };
+
+        imgbbResponse = await imgbbUploader(options);
+      }
+
+      console.log(req.body);
 
       const newEmail = req.body.email;
       const newUsername = req.body.username;
       const newCountry = req.body.country;
       const newGender = req.body.gender;
       const newAccountName = req.body.accountname;
+      const newImage = {
+        imgUrl: imgbbResponse ? imgbbResponse.image.url : '',
+        thumbUrl: imgbbResponse ? imgbbResponse.thumb.url : '',
+      };
 
       const userId = req.user._id;
 
-      const [user, token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, userId);
+      const [user, token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, newImage, userId);
 
       authHeaderSetter(res, token);
 
-      const { email, username, country, gender, accountName, accountNameChanged, verified } = user;
+      const { email, username, country, gender, accountName, accountNameChanged, image, verified } = user;
 
-      res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged, verified });
+      res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged, image, verified });
     } catch (err) {
       const error = errorParser(err);
       console.log(`>>> ERROR ${error}`);
@@ -141,9 +162,9 @@ authController.get('/user/verify', async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const { accountName, gender, verified } = user;
+    const { accountName, gender, image: { thumbUrl }, verified } = user;
 
-    res.json({ accountName, gender, _id: userId, verified });
+    res.json({ accountName, gender, _id: userId, thumbUrl, verified });
   } catch (err) {
     res.json(undefined);
   }

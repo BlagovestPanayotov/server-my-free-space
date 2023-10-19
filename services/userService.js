@@ -60,7 +60,7 @@ async function logout() {
 
 }
 
-async function updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, userId) {
+async function updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, newImage, userId) {
   const [bodyUser, user] = await Promise.all([User.findOne({ email: newEmail }), User.findById(userId)]);
 
   if (!bodyUser._id.equals(user._id)) {
@@ -87,6 +87,7 @@ async function updateUser(newEmail, newUsername, newCountry, newGender, newAccou
   user.country = newCountry;
   user.gender = newGender;
   user.accountName = newAccountName;
+  user.image = newImage;
 
   const token = createPayload(user);
 
