@@ -111,39 +111,41 @@ authController.put('/user', hasUser(),
     try {
       console.log('>>> PUT /users/user');
 
+
       const imageFile = req.file;
+      const newEmail = req.body.email;
+      const newUsername = req.body.username;
+      const newCountry = req.body.country;
+      const newGender = req.body.gender;
+      const newAccountName = req.body.accountname;
+      const newRemoveImage = req.body.removeImage === 'true';
+      let newImage;
       let imgbbResponse;
 
-      if (imageFile) {
+      if (!newRemoveImage && imageFile) {
         const options = {
           apiKey: process.env.IMGBB_API_KEY,
           base64string: imageFile.buffer.toString('base64'),
         };
 
         imgbbResponse = await imgbbUploader(options);
+
+        newImage = {
+          imgUrl: imgbbResponse.image.url,
+          thumbUrl: imgbbResponse.thumb.url,
+        };
       }
-
-      console.log(req.body);
-
-      const newEmail = req.body.email;
-      const newUsername = req.body.username;
-      const newCountry = req.body.country;
-      const newGender = req.body.gender;
-      const newAccountName = req.body.accountname;
-      const newImage = {
-        imgUrl: imgbbResponse ? imgbbResponse.image.url : '',
-        thumbUrl: imgbbResponse ? imgbbResponse.thumb.url : '',
-      };
 
       const userId = req.user._id;
 
-      const [user, token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, newImage, userId);
+
+      const [user, token] = await updateUser(newEmail, newUsername, newCountry, newGender, newAccountName, newImage, newRemoveImage, userId);
 
       authHeaderSetter(res, token);
 
-      const { email, username, country, gender, accountName, accountNameChanged, image, verified } = user;
+      const { email, username, country, gender, accountName, accountNameChanged, verified, image } = user;
 
-      res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged, image, verified });
+      res.json({ email, username, country, gender, _id: userId, accountName, accountNameChanged, verified, image });
     } catch (err) {
       const error = errorParser(err);
       console.log(`>>> ERROR ${error}`);
