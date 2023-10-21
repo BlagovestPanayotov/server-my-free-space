@@ -88,13 +88,13 @@ destinationController.get('/:id', async (req, res) => {
 });
 
 destinationController.put('/:id', hasUser(), async (req, res) => {
+  try {
   console.log(`>>> PUT /dest/${req.params.id}`);
 
   const current = await getById(req.params.id);
   if (req.user._id != current._ownerId) {
     return res.status(403).json({ message: 'You cannot modify this destination!' });
   }
-  try {
     const dest = await update(req.params.id, req.body);
     res.json(dest);
   } catch (err) {
