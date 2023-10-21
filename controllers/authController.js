@@ -156,9 +156,9 @@ authController.put('/user', hasUser(),
     }
   });
 
-authController.get('/user/view/:id', hasUser(), async (req, res) => {
+authController.get('/user/view/:userId', hasUser(), async (req, res) => {
   try {
-    console.log(`>>> GET /users/user/view/${req.params.id}`);
+    console.log(`>>> GET /users/user/view/${req.params.userId}`);
 
     const userId = req.params.userId;
 
