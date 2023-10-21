@@ -13,7 +13,7 @@ function createPayload(user) {
     _id: user._id,
     username: user.username,
     gender: user.gender,
-    imgThumb: user.image.thumbUrl,
+    image: user.image,
     accessToken: jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }),
   };
 
