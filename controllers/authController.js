@@ -156,6 +156,24 @@ authController.put('/user', hasUser(),
     }
   });
 
+authController.get('/user/view/:id', hasUser(), async (req, res) => {
+  try {
+    console.log(`>>> GET /users/user/view/${req.params.id}`);
+
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+
+    const { country, gender, accountName, image: { imgUrl }, verified } = user;
+
+    res.json({ country, gender, accountName, imgUrl, verified });
+  } catch (err) {
+    const error = errorParser(err);
+    console.log(`>>> ERROR ${error}`);
+    res.status(401).json('User Not Found!');
+  }
+});
+
 authController.get('/user/verify', async (req, res) => {
   try {
     console.log('>>> GET /users/user/verify');
@@ -171,6 +189,8 @@ authController.get('/user/verify', async (req, res) => {
     res.json(undefined);
   }
 });
+
+
 
 authController.get('/user/verify-resend', hasUser(), async (req, res) => {
   try {
