@@ -86,6 +86,7 @@ async function getAll(name, country, offset, pageSize) {
         ownerInfo: {
           thumbUrl: '$owner.image.thumbUrl',
           gender: '$owner.gender',
+          accountName: '$owner.accountName',
         }
       },
     }
@@ -215,7 +216,7 @@ async function getRandom() {
           $lookup: {
             from: 'likedestinations',
             localField: '_id',
-            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+            foreignField: '_destinationId',
             as: 'likes',
           },
         },
@@ -223,9 +224,20 @@ async function getRandom() {
           $lookup: {
             from: 'comments',
             localField: '_id',
-            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+            foreignField: '_destinationId',
             as: 'comments',
           },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: '_ownerId',
+            foreignField: '_id',
+            as: 'owner',
+          },
+        },
+        {
+          $unwind: '$owner',
         },
         {
           $project: {
@@ -236,6 +248,11 @@ async function getRandom() {
             _ownerId: 1,
             likeCount: { $size: '$likes' },
             commentCount: { $size: '$comments' },
+            ownerInfo: {
+              thumbUrl: '$owner.image.thumbUrl',
+              gender: '$owner.gender',
+              accountName: '$owner.accountName',
+            }
           },
         }
       ]),
@@ -246,7 +263,7 @@ async function getRandom() {
           $lookup: {
             from: 'likedestinations',
             localField: '_id',
-            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
+            foreignField: '_destinationId',
             as: 'likes',
           },
         },
@@ -254,9 +271,20 @@ async function getRandom() {
           $lookup: {
             from: 'comments',
             localField: '_id',
-            foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
+            foreignField: '_destinationId',
             as: 'comments',
           },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: '_ownerId',
+            foreignField: '_id',
+            as: 'owner',
+          },
+        },
+        {
+          $unwind: '$owner',
         },
         {
           $project: {
@@ -267,6 +295,11 @@ async function getRandom() {
             _ownerId: 1,
             likeCount: { $size: '$likes' },
             commentCount: { $size: '$comments' },
+            ownerInfo: {
+              thumbUrl: '$owner.image.thumbUrl',
+              gender: '$owner.gender',
+              accountName: '$owner.accountName',
+            }
           },
         }
       ]),
