@@ -158,6 +158,17 @@ async function getByUserId(userId, name, country, offset, pageSize) {
       },
     },
     {
+      $lookup: {
+        from: 'users',
+        localField: '_ownerId',
+        foreignField: '_id',
+        as: 'owner',
+      },
+    },
+    {
+      $unwind: '$owner',
+    },
+    {
       $project: {
         name: 1,
         country: 1,
@@ -166,6 +177,11 @@ async function getByUserId(userId, name, country, offset, pageSize) {
         _ownerId: 1,
         likeCount: { $size: '$likes' },
         commentCount: { $size: '$comments' },
+        ownerInfo: {
+          thumbUrl: '$owner.image.thumbUrl',
+          gender: '$owner.gender',
+          accountName: '$owner.accountName',
+        }
       },
     },
   ]);

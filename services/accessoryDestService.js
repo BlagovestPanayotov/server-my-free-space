@@ -40,7 +40,12 @@ async function removePostLike(_destinationId, _ownerId) {
 //COMMENTS
 
 async function getAllComments(_destinationId) {
-  return Comment.find({ _destinationId });
+  return Comment.find({ _destinationId })
+    .populate({
+      path: '_ownerId',
+      model: 'User',
+      select: '_id accountName gender image.thumbUrl',
+    });
 }
 
 async function getCommentById(_commentId) {
@@ -71,7 +76,7 @@ async function deleteCommentById(_id) {
 //COMMENTS LIKES
 
 async function hasLikedComment(_commentId, _ownerId) {
-  return await LikeComment.findOne({ _commentId, _ownerId });
+  return LikeComment.findOne({ _commentId, _ownerId });
 }
 
 async function getCommentLikes(_commentId, userId) {
