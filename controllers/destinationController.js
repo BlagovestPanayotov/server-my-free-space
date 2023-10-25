@@ -30,9 +30,9 @@ destinationController.get('/my-destination/', hasUser(), async (req, res) => {
     console.log('>>> GET /dest/my-destination');
 
     const userId = req.user._id;
-    const { name, country, offset, pageSize } = req.query;
+    const {offset, pageSize } = req.query;
 
-    const destinations = await getByUserId(userId, name, country, offset, pageSize);
+    const destinations = await getByUserId(userId, offset, pageSize);
 
     res.json(destinations);
   } catch (err) {
