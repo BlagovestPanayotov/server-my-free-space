@@ -4,47 +4,12 @@ const Destination = require("../models/Destination");
 
 async function getAll(name, country, offset, pageSize) {
   const nameRegexp = new RegExp(name, 'i');
-  if (country) {
-    return Destination.aggregate([
-      {
-        $match: {
-          name: { $regex: nameRegexp },
-          country: country,
-        },
-      },
-      {
-        $lookup: {
-          from: 'likedestinations',
-          localField: '_id',
-          foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'likes' collection
-          as: 'likes',
-        },
-      },
-      {
-        $lookup: {
-          from: 'comments',
-          localField: '_id',
-          foreignField: '_destinationId', // Assuming you have a field named 'destinationId' in the 'comments' collection
-          as: 'comments',
-        },
-      },
-      {
-        $project: {
-          name: 1,
-          country: 1,
-          description: 1,
-          img: '$img.thumbUrl',
-          _ownerId: 1,
-          likeCount: { $size: '$likes' },
-          commentCount: { $size: '$comments' },
-        },
-      }
-    ]);
-  }
+
   return Destination.aggregate([
     {
       $match: {
         name: { $regex: nameRegexp },
+        country: country || '',
       },
     },
     {
