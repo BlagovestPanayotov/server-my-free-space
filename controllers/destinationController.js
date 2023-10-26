@@ -24,13 +24,29 @@ destinationController.get('/destinations', async (req, res) => {
   }
 });
 
-destinationController.get('/my-destination/', hasUser(), async (req, res) => {
+destinationController.get('/my-destinations/', hasUser(), async (req, res) => {
   try {
 
     console.log('>>> GET /dest/my-destination');
 
     const userId = req.user._id;
-    const {offset, pageSize } = req.query;
+    const { offset, pageSize } = req.query;
+
+    const destinations = await getByUserId(userId, offset, pageSize);
+
+    res.json(destinations);
+  } catch (err) {
+    const error = errorParser(err);
+    res.status(400).json({ error });
+  }
+});
+
+destinationController.get('/user-destinations/:userId', hasUser(), async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    console.log(`>>> GET /dest/user-destinations/${{ userId }}`);
+
+    const { offset, pageSize } = req.query;
 
     const destinations = await getByUserId(userId, offset, pageSize);
 
@@ -75,9 +91,9 @@ destinationController.get('/random', async (req, res) => {
 });
 
 destinationController.get('/:id', async (req, res) => {
-  console.log(`>>> GET /dest/${req.params.id}`);
-
   try {
+    console.log(`>>> GET /dest/${req.params.id}`);
+
     const dest = await getById(req.params.id);
     res.json(dest);
   } catch (err) {
@@ -89,12 +105,12 @@ destinationController.get('/:id', async (req, res) => {
 
 destinationController.put('/:id', hasUser(), async (req, res) => {
   try {
-  console.log(`>>> PUT /dest/${req.params.id}`);
+    console.log(`>>> PUT /dest/${req.params.id}`);
 
-  const current = await getById(req.params.id);
-  if (req.user._id != current._ownerId) {
-    return res.status(403).json({ message: 'You cannot modify this destination!' });
-  }
+    const current = await getById(req.params.id);
+    if (req.user._id != current._ownerId) {
+      return res.status(403).json({ message: 'You cannot modify this destination!' });
+    }
     const dest = await update(req.params.id, req.body);
     res.json(dest);
   } catch (err) {
@@ -104,13 +120,13 @@ destinationController.put('/:id', hasUser(), async (req, res) => {
 });
 
 destinationController.delete('/:id', hasUser(), async (req, res) => {
-  console.log(`>>> DELETE /dest/${req.params.id}`);
-
-  const dest = await getById(req.params.id);
-  if (req.user._id != dest._ownerId) {
-    return res.status(403).json({ message: 'You cannot delete this destination!' });
-  }
   try {
+    console.log(`>>> DELETE /dest/${req.params.id}`);
+
+    const dest = await getById(req.params.id);
+    if (req.user._id != dest._ownerId) {
+      return res.status(403).json({ message: 'You cannot delete this destination!' });
+    }
 
     //ImgBB doesn't have an option to delete an image yet. Doesn't set expiration!
 
