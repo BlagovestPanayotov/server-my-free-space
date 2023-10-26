@@ -1,7 +1,7 @@
 const authController = require('express').Router();
 const { body, validationResult } = require('express-validator');
 
-const { register, login, updateUser, resendVerEmail } = require('../services/userService');
+const { register, login, updateUser, resendVerEmail, findUserNotOwner } = require('../services/userService');
 const { authHeaderSetter } = require('../utils/authHeaderSetter');
 const { countriesList, PASSWORD_REGEXP } = require('../utils/assets');
 const errorParser = require('../utils/errorParser');
@@ -162,11 +162,9 @@ authController.get('/user/view/:userId', hasUser(), async (req, res) => {
 
     const userId = req.params.userId;
 
-    const user = await User.findById(userId);
+    const user = await findUserNotOwner(userId);
 
-    const { country, gender, accountName, image: { imgUrl }, verified } = user;
-
-    res.json({ country, gender, accountName, imgUrl, verified });
+    res.json(user[0]);
   } catch (err) {
     const error = errorParser(err);
     console.log(`>>> ERROR ${error}`);

@@ -5,6 +5,7 @@ const { createPayload } = require('../utils/payloadParser');
 const Util = require('../models/Util');
 const { getAccountName, getRandomUrl, getRandomPass } = require('../utils/valuesGenerator');
 const { sendVerificationEmail } = require('../utils/nodemailer/nodemailerProperties');
+const { Types } = require('mongoose');
 
 async function register(email, username, password, country, gender) {
   const existing = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
@@ -103,6 +104,36 @@ async function updateUser(newEmail, newUsername, newCountry, newGender, newAccou
   return [user, token];
 }
 
+async function findUserNotOwner(userId) {
+  const _userId = new Types.ObjectId(userId);
+
+  return await User.aggregate([
+    {
+      $match: {
+        _id: _userId,
+      },
+    },
+    {
+      $lookup: {
+        from: 'destinations',
+        localField: '_id',
+        foreignField: '_ownerId',
+        as: 'destinations',
+      },
+    },
+    {
+      $project: {
+        country: 1,
+        gender: 1,
+        accountName: 1,
+        imgUrl: '$image.imgUrl',
+        verified: 1,
+        destinationsCount: { $size: '$destinations' },
+      },
+    },
+  ]);
+}
+
 function resendVerEmail(userEmail, url) {
   sendVerificationEmail(userEmail, url);
 }
@@ -112,5 +143,6 @@ module.exports = {
   login,
   logout,
   updateUser,
-  resendVerEmail
+  resendVerEmail,
+  findUserNotOwner
 };
